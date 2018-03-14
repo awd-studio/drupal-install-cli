@@ -27,7 +27,7 @@
     "bin": [
         "bin/drupal-install-cli"
     ],
-    "autoload-dev": {
+    "autoload": {
         "psr-4": {
             "DrupalInstallCli\\": "src/"
         }
