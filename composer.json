@@ -1,8 +1,17 @@
 {
     "name": "awd-studio/drupal-install-cli",
-    "description": "Provide a command for installing drupal with drush from the command line",
-    "type": "composer-plugin",
+    "description": "Provide a command for installing drupal with Drush from the command line",
+    "type": "library",
     "minimum-stability": "dev",
+    "keywords": [
+        "drupal",
+        "drupal-7",
+        "drupal-8",
+        "drupal-install",
+        "drush",
+        "symfony-console",
+        "cli"
+    ],
     "require": {
         "php": "^7.1",
         "symfony/console": "^2.1 || ^3.0 || ^4.0",
