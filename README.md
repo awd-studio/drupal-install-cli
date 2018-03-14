@@ -2,14 +2,16 @@
 
 Provide a command for installing drupal with drush from the command line 
 
-Using [Drush](http://www.drush.org) for install Drupal site.
+This package should be used with one of [Drupal Composer project](https://www.drupal.org/docs/develop/using-composer/using-composer-to-manage-drupal-site-dependencies).
+
+For now, plugin can install sites only with [Drush](http://www.drush.org), so it must be required in your project.
 
 -----
 
 ## Requirements
 - PHP ^7.1
 - [Composer](https://getcomposer.org) package manager
-- Installed and executable [Drush](http://www.drush.org) a command line shell for DRUPAL
+- [Drush](http://www.drush.org) a command line shell for DRUPAL
 - [symfony/console](https://github.com/symfony/console) ^2.1 || ^3.0 || ^4.0
 
 ## Install
@@ -29,20 +31,7 @@ Or add a dependency on **awd-studio/drupal-install-cli** to your project’s com
 
 ## Usage:
 
-Add command to your project's composer.json, to the "scripts" directive:
-```json
-{
-    "scripts": {
-        "dru-install": "vendor/bin/drupal-install-cli  drupal:site-install"
-    }
-}
-```
-And run: 
-```bash
-composer dru-install
-```
-
-Or call from CLI:
+Call command from CLI:
 ```bash
 vendor/bin/drupal-install-cli drupal:site-install --db-host='localhost' --db-user='[MY_DB_USER]' --db-name='[MY_DB_NAME]' --db-pass='[MY_DB_PASS]'
 ```

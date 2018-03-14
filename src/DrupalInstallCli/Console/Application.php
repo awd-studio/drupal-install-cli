@@ -55,4 +55,13 @@ class Application extends BaseApplication
     {
         return $this->rootDir;
     }
+
+
+    /**
+     * @return int
+     */
+    public function getConsoleWidth(): int
+    {
+        return $this->getTerminalWidth();
+    }
 }

@@ -1,11 +1,12 @@
 {
     "name": "awd-studio/drupal-install-cli",
     "description": "Provide a command for installing drupal with drush from the command line",
-    "type": "project",
+    "type": "composer-plugin",
     "minimum-stability": "dev",
     "require": {
         "php": "^7.1",
-        "symfony/console": "^2.1 || ^3.0 || ^4.0"
+        "symfony/console": "^2.1 || ^3.0 || ^4.0",
+        "drush/drush": "~8.0 || ~9.0"
     },
     "license": "MIT",
     "authors": [
@@ -17,7 +18,7 @@
     "bin": [
         "bin/drupal-install-cli"
     ],
-    "autoload": {
+    "autoload-dev": {
         "psr-4": {
             "DrupalInstallCli\\": "src/"
         }
