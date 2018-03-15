@@ -4,6 +4,8 @@ Provide a command for installing drupal with drush from the command line
 
 This package should be used with one of [Drupal Composer project](https://www.drupal.org/docs/develop/using-composer/using-composer-to-manage-drupal-site-dependencies).
 
+![Drupal Install CLI Screenshot](screenshot.png)
+
 For now, plugin can install sites only with [Drush](http://www.drush.org), so it must be required in your project.
 
 -----
@@ -31,7 +33,14 @@ Or add a dependency on **awd-studio/drupal-install-cli** to your project’s com
 
 ## Usage:
 
-Call command from CLI:
+Just call command from CLI:
+```bash
+vendor/bin/drupal-install-cli
+```
+Answer all questions and it'll be done.
+
+You also may pass the options for configure installation.
+As example:
 ```bash
 vendor/bin/drupal-install-cli drupal:site-install --db-host='localhost' --db-user='[MY_DB_USER]' --db-name='[MY_DB_NAME]' --db-pass='[MY_DB_PASS]'
 ```
