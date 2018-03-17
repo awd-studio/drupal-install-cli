@@ -27,12 +27,11 @@ switch (true) {
         );
 }
 
-use DrupalInstallCli\Console\Application;
+use Symfony\Component\Console\Application;
 use DrupalInstallCli\Command\DrushSiteInstallCommand;
-use Composer\Console\Application as ComposerApplication;
 
-$command = new DrushSiteInstallCommand();
+$command = new DrushSiteInstallCommand($rootDir);
 
-$app = new Application($rootDir, 'PHP client library for installing Drupal sites from CLI');
+$app = new Application('PHP client library for installing Drupal sites from CLI');
 $app->add($command);
 $app->run();

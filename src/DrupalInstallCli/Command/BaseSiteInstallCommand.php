@@ -17,10 +17,10 @@ namespace DrupalInstallCli\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Terminal;
 
 
 /**
@@ -34,6 +34,27 @@ abstract class BaseSiteInstallCommand extends Command
      * @var array Execution parameters.
      */
     protected $dataParams = [];
+
+    /**
+     * Path to project root directory.
+     *
+     * @var string
+     */
+    protected $rootDir;
+
+
+    /**
+     * BaseSiteInstallCommand constructor.
+     * @param string $rootDir
+     *
+     * @param null   $name
+     */
+    public function __construct(string $rootDir, $name = null)
+    {
+        $this->rootDir = $rootDir;
+
+        parent::__construct($name);
+    }
 
 
     /**
@@ -54,7 +75,9 @@ abstract class BaseSiteInstallCommand extends Command
             ->addOption('site-mail', null, InputOption::VALUE_OPTIONAL, 'Site E-mail')
             ->addOption('admin-login', null, InputOption::VALUE_OPTIONAL, 'Admin user name')
             ->addOption('admin-pass', null, InputOption::VALUE_OPTIONAL, 'Admin user password')
-            ->addOption('admin-mail', null, InputOption::VALUE_OPTIONAL, 'Admin user E-mail');
+            ->addOption('admin-mail', null, InputOption::VALUE_OPTIONAL, 'Admin user E-mail')
+            ->addOption('web-dir', null, InputOption::VALUE_OPTIONAL, 'Publick WEB directory',
+                $this->getDefaultWebDir());
     }
 
 
@@ -63,7 +86,7 @@ abstract class BaseSiteInstallCommand extends Command
      */
     public function getRootDir(): string
     {
-        return $this->getApplication()->getRootDir();
+        return $this->rootDir;
     }
 
 
@@ -75,14 +98,14 @@ abstract class BaseSiteInstallCommand extends Command
         $rootDir = $this->getRootDir();
 
         if (isset($this->getComposerConfig()->{'config'}->{'bin-dir'})) {
-            $bin = $this->getComposerConfig()->{'config'}->{'bin-dir'};
+            $binDir = $this->getComposerConfig()->{'config'}->{'bin-dir'};
         } elseif (is_dir($rootDir . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'bin')) {
-            $bin = $rootDir . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'bin';
+            $binDir = $rootDir . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'bin';
         } else {
             die('There no bin directory found.');
         }
 
-        return $bin;
+        return $binDir;
     }
 
 
@@ -108,18 +131,36 @@ abstract class BaseSiteInstallCommand extends Command
     /**
      * @return string
      */
-    public function getWebDir(): string
+    public function getDefaultWebDir(): string
     {
         $composer = $this->getComposerConfig();
-        $web = $composer->extra->{'drupal-composer-helper'}->{'web-prefix'};
+        $webDir = 'web';
 
-        return $this->getRootDir() . DIRECTORY_SEPARATOR . $web . DIRECTORY_SEPARATOR;
+        if (isset($composer->extra->{'drupal-composer-helper'}->{'web-prefix'})) {
+            $webDir = $composer->extra->{'drupal-composer-helper'}->{'web-prefix'};
+        }
+
+        return $this->getRootDir() . DIRECTORY_SEPARATOR . $webDir;
     }
 
 
     /**
-     * @param string      $question
-     * @param string|null $default
+     * @return null|string
+     */
+    public function getWebDir()
+    {
+        $defaultWebDir = $this->getDefaultWebDir();
+
+        return is_dir($defaultWebDir) ? $defaultWebDir . DIRECTORY_SEPARATOR : null;
+    }
+
+
+    /**
+     * @param \Symfony\Component\Console\Input\InputInterface   $input
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     * @param string                                            $question
+     * @param string|null                                       $default
+     * @param int                                               $counter
      * @return string
      */
     public function askData(
@@ -149,6 +190,7 @@ abstract class BaseSiteInstallCommand extends Command
     {
         exec('git config user.email', $output);
         $gitEmail = (isset($output[0]) && filter_var($output[0], FILTER_VALIDATE_EMAIL)) ? $output[0] : null;
+
         return $gitEmail;
     }
 
@@ -158,7 +200,7 @@ abstract class BaseSiteInstallCommand extends Command
      */
     public function getTerminalWidth(): int
     {
-        return $this->getApplication()->getConsoleWidth();
+        return (new Terminal())->getWidth();
     }
 
 
@@ -172,8 +214,7 @@ abstract class BaseSiteInstallCommand extends Command
 
         $textLen = strlen($text);
         if ($textLen <= $max) {
-            $size = $max - $textLen;
-            $side = str_repeat(' ', (int) round($size / 2));
+            $side = str_repeat(' ', (int) round(($max - $textLen) / 2));
         } else {
             $side = '';
         }
@@ -183,11 +224,13 @@ abstract class BaseSiteInstallCommand extends Command
 
 
     /**
+     * @param string $text
+     * @param string $type
      * @return string
      */
     public function getPromtMessage(string $text, string $type = 'fg=black;bg=cyan'): string
     {
-        $end = preg_match('/=/', $type) ? '' : $type;
+        $end = strstr($type, '/=/', true) ? '' : $type;
         $message = $this->wrappText($text);
 
         return "<{$type}>{$message}</{$end}>";
@@ -196,21 +239,9 @@ abstract class BaseSiteInstallCommand extends Command
 
     /**
      * @return string
-     *
-     * ToDo: Choose the logo;
      */
     public function getLogo(): string
     {
-        /*return <<<EOT
- ____                         _
-|  _ \ _ __ _   _ _ __   __ _| |
-| | | | '__| | | | '_ \ / _` | |
-| |_| | |  | |_| | |_) | (_| | |
-|____/|_|   \__,_| .__/ \__,_|_|
-                 |_|
-
-EOT;*/
-
         return <<<EOT
 8888888b.                                     888
 888  "Y88b                                    888
@@ -268,7 +299,7 @@ EOT;
      */
     public function writeFinishMessage(bool $success = true): string
     {
-        $message = $success ? 'Instalation finished success!' : 'Instalation failed!';
+        $message = $success ? 'Installation finished success!' : 'Instalation failed!';
         $type = $success ? 'fg=black;bg=cyan' : 'fg=black;bg=red';
 
         return $this->writeMessage($this->getPromtMessage($message, $type));
@@ -327,7 +358,8 @@ EOT;
      */
     public function getDataParam(string $name)
     {
-        $name = preg_replace('/_/', '-', $name);
+        $name = str_replace('_', '-', $name);
+
         return $this->dataParams[$name] ?? null;
     }
 
@@ -363,6 +395,9 @@ EOT;
         $this->getParam($input, $output, 'site-name', 'Please, enter the site name', 'Site Name');
         $admin_mail = $this->getDataParam('admin_mail');
         $this->getParam($input, $output, 'site-mail', 'Please, enter the Site E-mail', $admin_mail);
+
+        // Ask WEB dir
+        $this->getParam($input, $output, 'web-dir', 'Please, enter the WEB directory');
     }
 
 
@@ -405,7 +440,7 @@ EOT;
 
         // Execute command
         $exec = $this->buildExecution($input, $output);
-        $output->writeln($this->getExecuteMessage($output));
+        $output->writeln($this->getExecuteMessage());
         $success = $this->executeCommand($exec);
 
         // Finish

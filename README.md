@@ -35,7 +35,7 @@ Or add a dependency on **awd-studio/drupal-install-cli** to your project’s com
 
 Just call command from CLI:
 ```bash
-vendor/bin/drupal-install-cli
+vendor/bin/drupal-install-cli drupal:site-install
 ```
 Answer all questions and it'll be done.
 
